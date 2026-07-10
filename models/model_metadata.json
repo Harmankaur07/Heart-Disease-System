@@ -1,0 +1,57 @@
+{
+  "best_model": "Random Forest",
+  "feature_columns": [
+    "age",
+    "sex",
+    "cp",
+    "trestbps",
+    "chol",
+    "fbs",
+    "restecg",
+    "thalach",
+    "exang",
+    "oldpeak",
+    "slope",
+    "ca",
+    "thal"
+  ],
+  "all_results": {
+    "Logistic Regression": {
+      "accuracy": 89.0,
+      "precision": 84.31,
+      "recall": 93.48,
+      "f1_score": 88.66
+    },
+    "Random Forest": {
+      "accuracy": 91.5,
+      "precision": 89.47,
+      "recall": 92.39,
+      "f1_score": 90.91
+    },
+    "Decision Tree": {
+      "accuracy": 84.5,
+      "precision": 83.52,
+      "recall": 82.61,
+      "f1_score": 83.06
+    },
+    "Support Vector Machine": {
+      "accuracy": 90.5,
+      "precision": 86.14,
+      "recall": 94.57,
+      "f1_score": 90.16
+    },
+    "K-Nearest Neighbors": {
+      "accuracy": 90.0,
+      "precision": 91.86,
+      "recall": 85.87,
+      "f1_score": 88.76
+    },
+    "XGBoost": {
+      "accuracy": 91.0,
+      "precision": 86.27,
+      "recall": 95.65,
+      "f1_score": 90.72
+    }
+  },
+  "has_xgboost": true
+}

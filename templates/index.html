@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CardioSense — Heart Disease Risk Detection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 48 24" width="34" height="17">
+        <path d="M0 12 H10 L14 2 L20 22 L25 6 L29 12 H48" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>CardioSense</span>
+    </div>
+
+    <nav class="nav">
+      <button class="nav-item active" data-view="dashboard">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-item" data-view="predict">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M22 12h-4l-3 9L9 3l-3 9H2v2h5.5l1.5-4.5L13 21l3-9h6v-0z"/></svg>
+        New Prediction
+      </button>
+      <button class="nav-item" data-view="history">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M13 3a9 9 0 100 18 9 9 0 000-18zm.5 4.5v5l4.25 2.52-.77 1.28L12 13V7.5h1.5z"/></svg>
+        History
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+        <svg id="icon-sun" viewBox="0 0 24 24" width="17" height="17"><path fill="currentColor" d="M12 4V2m0 20v-2M6.34 6.34L4.93 4.93m14.14 14.14l-1.41-1.41M4 12H2m20 0h-2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
+        <svg id="icon-moon" viewBox="0 0 24 24" width="17" height="17" style="display:none"><path fill="currentColor" d="M20.7 15.3a8.5 8.5 0 01-9-13.3A9 9 0 1022 12.6a8.9 8.9 0 01-1.3 2.7z"/></svg>
+        <span id="theme-label">Dark mode</span>
+      </button>
+      <p class="disclaimer">Screening aid only — not a medical diagnosis.</p>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+
+    <!-- ---------- DASHBOARD VIEW ---------- -->
+    <section class="view active" id="view-dashboard">
+      <header class="view-header">
+        <div>
+          <h1>Dashboard</h1>
+          <p class="subtitle">Overview of model performance and prediction activity</p>
+        </div>
+      </header>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-icon icon-total"></div>
+          <div>
+            <span class="stat-value" id="stat-total">0</span>
+            <span class="stat-label">Total predictions</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-high"></div>
+          <div>
+            <span class="stat-value" id="stat-high">0</span>
+            <span class="stat-label">High risk flagged</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-low"></div>
+          <div>
+            <span class="stat-value" id="stat-low">0</span>
+            <span class="stat-label">Low risk flagged</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-conf"></div>
+          <div>
+            <span class="stat-value" id="stat-conf">0%</span>
+            <span class="stat-label">Avg. confidence</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="card chart-card">
+          <h3>Prediction outcome split</h3>
+          <div class="chart-wrap"><canvas id="chart-pie"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <h3>Model accuracy comparison</h3>
+          <p class="best-model-tag">Best model in production: <strong id="best-model-name">—</strong></p>
+          <div class="chart-wrap"><canvas id="chart-bar"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- PREDICT VIEW ---------- -->
+    <section class="view" id="view-predict">
+      <header class="view-header">
+        <div>
+          <h1>New Prediction</h1>
+          <p class="subtitle">Enter patient vitals to estimate heart disease risk</p>
+        </div>
+      </header>
+
+      <div class="predict-layout">
+        <form class="card form-card" id="predict-form" novalidate>
+          <div class="field full">
+            <label for="patient_name">Patient name</label>
+            <input type="text" id="patient_name" name="patient_name" placeholder="e.g. John Doe" maxlength="60">
+          </div>
+
+          <div class="field">
+            <label for="age">Age <span class="req">*</span></label>
+            <input type="number" id="age" name="age" placeholder="e.g. 54" min="1" max="120" required>
+            <span class="error-msg"></span>
+          </div>
+
+          <div class="field">
+            <label for="sex">Sex <span class="req">*</span></label>
+            <select id="sex" name="sex" required>
+              <option value="">Select</option>
+              <option value="1">Male</option>
+              <option value="0">Female</option>
+            </select>
+            <span class="error-msg"></span>
+          </div>
+
+          <div class="field">
+            <label for="cp">Chest pain type <span class="req">*</span></label>
+            <select id="cp" name="cp" required>
+              <option value="">Select</option>
+              <option value="0">Typical angina</option>
+              <option value="1">Atypical angina</option>
+              <option value="2">Non-anginal pain</option>
+              <option value="3">Asymptomatic</option>
+            </select>
+            <span class="error-msg"></span>
+          </div>
+
+          <div class="field">
+            <label for="trestbps">Resting BP (mm Hg) <span class="req">*</span></label>
+            <input type="number" id="trestbps" name="trestbps" placeholder="e.g. 130" min="60" max="250" required>
+            <span class="error-msg"></span>
+          </div>
+
+          <div class="field">
+            <label for="chol">Cholesterol (mg/dl) <span class="req">*</span></label>
+            <input type="number" id="chol" name="chol" placeholder="e.g. 246" min="50" max="700" required>
+            <span class="error-msg"></span>
+          </div>
+
+          <div class="field">
+            <label for="fbs">Fasting blood sugar &gt;120 mg/dl <span class="req">*</span></label>
+            <select id="fbs" name="fbs" required>
+              <option value="">Select</option>
+              <option value="1">Yes</option>
+              <option value="0">No</option>
+            </select>
+            <span class="error-msg"></span>
+          </div>
+
+          <div class="field">
+            <label for="restecg">Resting ECG result <span class="req">*</span></label>
+            <select id="restecg" name="restecg" required>
+              <option value="">Select</option>
+              <option value="0">Normal</option>
+              <option value="1">ST-T wave abnormality</option>
+              <option value="2">Left ventricular hypertrophy</option>
+            </select>
+            <span class="error-msg"></span>
+          </div>
+
+          <div class="field">
+            <label for="thalach">Max heart rate achieved <span class="req">*</span></label>
+            <input type="number" id="thalach" name="thalach" placeholder="e.g. 150" min="50" max="250" required>
+            <span class="error-msg"></span>
+          </div>
+
+          <div class="field">
+            <label for="exang">Exercise-induced angina <span class="req">*</span></label>
+            <select id="exang" name="exang" required>
+              <option value="">Select</option>
+              <option value="1">Yes</option>
+              <option value="0">No</option>
+            </select>
+            <span class="error-msg"></span>
+          </div>
+
+          <div class="field">
+            <label for="oldpeak">ST depression (oldpeak) <span class="req">*</span></label>
+            <input type="number" id="oldpeak" name="oldpeak" placeholder="e.g. 1.4" min="0" max="10" step="0.1" required>
+            <span class="error-msg"></span>
+          </div>
+
+          <div class="field">
+            <label for="slope">Slope of peak exercise ST <span class="req">*</span></label>
+            <select id="slope" name="slope" required>
+              <option value="">Select</option>
+              <option value="0">Upsloping</option>
+              <option value="1">Flat</option>
+              <option value="2">Downsloping</option>
+            </select>
+            <span class="error-msg"></span>
+          </div>
+
+          <div class="field">
+            <label for="ca">Major vessels colored (0–4) <span class="req">*</span></label>
+            <select id="ca" name="ca" required>
+              <option value="">Select</option>
+              <option value="0">0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
+            <span class="error-msg"></span>
+          </div>
+
+          <div class="field">
+            <label for="thal">Thalassemia <span class="req">*</span></label>
+            <select id="thal" name="thal" required>
+              <option value="">Select</option>
+              <option value="1">Normal</option>
+              <option value="2">Fixed defect</option>
+              <option value="3">Reversible defect</option>
+            </select>
+            <span class="error-msg"></span>
+          </div>
+
+          <div class="form-actions full">
+            <button type="button" class="btn btn-ghost" id="reset-btn">Reset form</button>
+            <button type="submit" class="btn btn-primary" id="predict-btn">
+              <span class="btn-label">Predict risk</span>
+              <span class="btn-spinner" hidden></span>
+            </button>
+          </div>
+        </form>
+
+        <div class="result-col">
+          <!-- Loading state -->
+          <div class="card result-card loading-card" id="loading-card" hidden>
+            <div class="ecg-loader">
+              <svg viewBox="0 0 300 60" preserveAspectRatio="none">
+                <path class="ecg-path" d="M0 30 H60 L75 10 L90 50 L105 30 H150 L165 5 L180 55 L195 30 H300"/>
+              </svg>
+            </div>
+            <p class="loading-text">Analyzing vitals…</p>
+          </div>
+
+          <!-- Empty state -->
+          <div class="card result-card empty-card" id="empty-card">
+            <svg viewBox="0 0 24 24" width="40" height="40" class="empty-icon"><path fill="currentColor" d="M12 21s-7.5-4.6-10.1-9.3C.5 8.8 1.7 5.4 5 4.4c2-.6 4 .2 5 1.8 1-1.6 3-2.4 5-1.8 3.3 1 4.5 4.4 3.1 7.3C19.5 16.4 12 21 12 21z"/></svg>
+            <p>Fill in the form and click <strong>Predict risk</strong> to see the result here.</p>
+          </div>
+
+          <!-- Result state -->
+          <div class="card result-card" id="result-card" hidden>
+            <div class="result-badge" id="result-badge">
+              <span id="result-label">—</span>
+            </div>
+            <div class="confidence-wrap">
+              <svg class="confidence-ring" viewBox="0 0 120 120">
+                <circle class="ring-bg" cx="60" cy="60" r="52"/>
+                <circle class="ring-fg" id="ring-fg" cx="60" cy="60" r="52"/>
+              </svg>
+              <div class="confidence-text">
+                <span id="confidence-value">0%</span>
+                <span>confidence</span>
+              </div>
+            </div>
+            <p class="result-meta" id="result-timestamp"></p>
+            <div class="recommendation-box">
+              <h4>Recommendation</h4>
+              <p id="recommendation-text"></p>
+            </div>
+
+            <div class="summary-box" id="summary-box">
+              <h4>Patient summary</h4>
+              <div class="summary-grid" id="summary-grid"></div>
+            </div>
+
+            <button class="btn btn-outline full" id="export-pdf-btn">Export report as PDF</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- HISTORY VIEW ---------- -->
+    <section class="view" id="view-history">
+      <header class="view-header">
+        <div>
+          <h1>Prediction history</h1>
+          <p class="subtitle">Search and review past predictions</p>
+        </div>
+        <div class="search-wrap">
+          <input type="search" id="search-input" placeholder="Search by name, risk, or date…">
+        </div>
+      </header>
+
+      <div class="card table-card">
+        <div class="table-scroll">
+          <table id="history-table">
+            <thead>
+              <tr>
+                <th>Patient</th><th>Age</th><th>Sex</th><th>Risk</th><th>Confidence</th><th>Date</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="history-body"></tbody>
+          </table>
+        </div>
+        <p class="empty-history" id="empty-history" hidden>No predictions yet. Run your first prediction to see it here.</p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
