@@ -14,7 +14,7 @@ This project demonstrates the complete machine learning workflow, including data
 
 # 🔗 GitHub Repository
 
-**Repository Link:** *https://github.com/Harmankaur07/smart_image_annotation/upload*
+**Repository Link:** *(https://github.com/Harmankaur07/Heart-Disease-System)*
 
 # 🔗 Deployment link
 
