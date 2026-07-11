@@ -6,7 +6,7 @@ custom **HTML/CSS/JS dashboard** on the frontend.
 
 ## 📖 Brief Project Description
 
-The Heart Disease Detection System is a machine learning-based web application that predicts the likelihood of heart disease using patient medical information. The project provides an intuitive web interface built with HTML, CSS, and JavaScript, while the backend is developed using Flask.
+The Heart Disease Risk Detection System is a machine learning-based web application that predicts the likelihood of heart disease using patient medical information. The project provides an intuitive web interface built with HTML, CSS, and JavaScript, while the backend is developed using Flask.
 
 The machine learning model is trained from scratch using the Heart Disease dataset with Scikit-learn. During training, the dataset is preprocessed, split into training and testing sets, and used to train a classification model. The trained model is then saved and integrated into the Flask application to provide real-time predictions for new patient data.
 
