@@ -1,4 +1,4 @@
-# CardioSense — Heart Disease Detection System
+# CardioSense — Heart Disease Risk Detection System
 
 A full-stack Machine Learning web app that estimates heart disease risk from
 patient vitals, built with **Flask + scikit-learn** on the backend and a
