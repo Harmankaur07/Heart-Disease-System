@@ -16,7 +16,7 @@ This project demonstrates the complete machine learning workflow, including data
 
 **Repository Link:** *https://github.com/Harmankaur07/Heart-Disease-System*
 
-🔗 Deployment link
+
 
 # 📌 Project Overview
 
