@@ -158,7 +158,7 @@ one to `models/heart\_model.pkl`, and write the plots to `plots/`.
 python app.py
 ```
 
-Open http://192.168.9.202:5000 in your browser.
+Open http://10.86.79.57:5000 in your browser.
 
 # 🚀 How to Use
 
@@ -175,7 +175,7 @@ Open http://192.168.9.202:5000 in your browser.
    Open your browser and go to:
 
 ```
-   http://192.168.9.202:5000
+   http://10.86.79.57:5000
 
 3. \*\*Enter Patient Information\*\*
 
